@@ -9,6 +9,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from modular_extractor.core.file import File
+from papyrus.core.file import File
 
 __all__ = ["File"]

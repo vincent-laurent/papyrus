@@ -13,7 +13,7 @@ from collections import defaultdict
 
 import copy
 
-from modular_extractor.engine import extractor
+from papyrus.engine import extractor
 
 
 class ExtractorFactory:
@@ -25,7 +25,8 @@ class ExtractorFactory:
             return file._extract_tables(extractor)
         if content == "all":
             return file._extract_all(extractor)
-        
+
+
 class File:
     def __init__(self, path):
         self.path = path
@@ -37,21 +38,21 @@ class File:
         for page in self.pages.values():
             tables.extend(page.get("tables", []))
         return tables
-    
-    def __text_by_format(self, format = ""):
+
+    def __text_by_format(self, format=""):
         text: str = ""
         for page in self.pages.values():
-            text += page.get("text"+format, page.get("text", ""))
+            text += page.get("text" + format, page.get("text", ""))
         return text
-    
+
     @property
-    def text(self, format = ""):
-        return self.__text_by_format() 
-    
+    def text(self, format=""):
+        return self.__text_by_format()
+
     @property
-    def text_markdown(self, format = "") -> str:
-        return self.__text_by_format(format = "_md") 
-    
+    def text_markdown(self, format="") -> str:
+        return self.__text_by_format(format="_md")
+
     def _export_text(self, format):
         parts = []
         for p in sorted(self.pages.keys()):
@@ -69,7 +70,7 @@ class File:
             for i, df in enumerate(page["tables"]):
                 parts.append(f"<!-- Page {p} - Table {i+1} -->")
                 parts.append(df.to_markdown(index=False))
-                parts.append("") 
+                parts.append("")
         return "\n\n".join(parts)
 
     def _export_both(self):
@@ -83,13 +84,17 @@ class File:
             for i, df in enumerate(page["tables"]):
                 parts.append(f"<!-- Page {p} - Table {i+1} -->")
                 parts.append(df.to_markdown(index=False))
-            parts.append("")  
+            parts.append("")
         return "\n\n".join(parts)
 
     def export(self, format="text", content="text"):
 
         assert format in {"text", "md"}, "format must be 'text' or 'md'"
-        assert content in {"text", "tables", "both"}, "content must be 'text', 'tables', or 'both'"
+        assert content in {
+            "text",
+            "tables",
+            "both",
+        }, "content must be 'text', 'tables', or 'both'"
 
         if content == "text":
             return self._export_text(format)
@@ -98,7 +103,7 @@ class File:
         elif content == "both":
             return self._export_both()
 
-    def extract(self, extractor: "extractor.BaseExtractor",  content = "text"):
+    def extract(self, extractor: "extractor.BaseExtractor", content="text"):
         ExtractorFactory().get_processor(self, content, extractor)
 
     def _extract_tables(self, extractor: "extractor.BaseExtractor"):
@@ -119,7 +124,7 @@ class File:
                 self.pages[page_number]["text_md"] = ""
 
         return self
-    
+
     def _extract_text(self, extractor: "extractor.BaseExtractor"):
         for page_number in self.pages:
             self.pages[page_number]["text"] = ""
@@ -135,11 +140,13 @@ class File:
                 self.pages[page_number]["tables"] = []
 
         return self
-    
+
     def _extract_all(self, extractor: "extractor.BaseExtractor"):
         extractor.run(self)
         return self
 
     def show_capabilities(self, extractor: "extractor.BaseExtractor"):
         caps = getattr(extractor, "capabilities", set())
-        print(f"{extractor.__class__.__name__} supports: {', '.join(caps) or 'nothing'}")
+        print(
+            f"{extractor.__class__.__name__} supports: {', '.join(caps) or 'nothing'}"
+        )
