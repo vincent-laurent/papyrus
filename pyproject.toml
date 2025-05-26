@@ -25,11 +25,11 @@ lint = [
 optional_extractor = [
     "PyPDF2==3.0.1",
     "easyocr==1.7.2",
-    "fitz",
+    "pymupdf",
     "pytesseract==0.3.13",
     "torch==2.7.0",
-    "camelot-py ==1.0.0",
-    "docling == 2.34.0",
+    "camelot-py==1.0.0",
+    "docling==2.34.0",
     "huggingface-hub==0.32.0",
 ]
 

@@ -3,7 +3,7 @@ import pytest
 from papyrus import engine
 from papyrus.core.file import File
 
-path = "./data_pdf/invoice_100.pdf"
+path = "./papyrus/data_pdf/invoice_100.pdf"
 
 
 def run_extractor_tests(extractor):
