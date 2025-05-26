@@ -57,6 +57,7 @@ jobs:
 
       - name: Analysing the code with pytest
         run: |
+          pip install .
           pip install .[optional_extractor]
           pip install .[test]
           rm -rf src
