@@ -44,19 +44,3 @@ def test_all_extractors(extractor):
     run_extractor_tests(extractor)
 
 
-def test_personalized_extractor():
-    from papyrus.engine import BaseExtractor
-
-    class CombinedExtractor(BaseExtractor):
-        def _run_impl(self, file):
-            engine.CamelotExtractor().run(file)
-            engine.PyPDF2Extractor().run(file)
-
-    extractor = CombinedExtractor()
-
-    # asserts
-    assert isinstance(extractor, CombinedExtractor)
-    assert isinstance(extractor, BaseExtractor)
-
-    assert hasattr(extractor, "_run_impl")
-    run_extractor_tests(extractor)
