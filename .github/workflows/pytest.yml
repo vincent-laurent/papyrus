@@ -61,7 +61,7 @@ jobs:
           pip install .[optional_extractor]
           pip install .[test]
           rm -rf src
-          python -m coverage run -m pytest
+          python -m coverage run --source=papyrus -m pytest
           python -m coverage report
           python -m coverage json
 
