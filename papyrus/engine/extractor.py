@@ -364,6 +364,6 @@ class CamelotExtractor(BaseExtractor):
         except ImportError:
             raise ImportError("'camelot' is not installed. Run `pip install camelot`")
 
-        tables = camelot.read_pdf(file.path, pages="all",flavor="stream")
+        tables = camelot.read_pdf(file.path, pages="all", flavor="stream")
         for page_number, table in enumerate(tables):
             file.pages[page_number]["tables"].append(table.df)
