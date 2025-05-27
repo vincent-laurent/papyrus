@@ -9,6 +9,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from modular_extractor.engine.extractor import CamelotExtractor, DoclingExtractor, PDFPlumberExtractor, PyMuPDFExtractor, PyPDF2Extractor, EasyOCRExtractor, TesseractOCRExtractor, HuggingFaceOCRExtractor, BaseExtractor
+from papyrus.engine.extractor import (
+    CamelotExtractor,
+    DoclingExtractor,
+    PDFPlumberExtractor,
+    PyMuPDFExtractor,
+    PyPDF2Extractor,
+    EasyOCRExtractor,
+    TesseractOCRExtractor,
+    HuggingFaceOCRExtractor,
+    BaseExtractor,
+)
 
-__all__ = ["CamelotExtractor","DoclingExtractor", "PDFPlumberExtractor", "PyMuPDFExtractor", "PyPDF2Extractor", "TesseractOCRExtractor", "EasyOCRExtractor", "HuggingFaceOCRExtractor", "BaseExtractor"]
+__all__ = [
+    "CamelotExtractor",
+    "DoclingExtractor",
+    "PDFPlumberExtractor",
+    "PyMuPDFExtractor",
+    "PyPDF2Extractor",
+    "TesseractOCRExtractor",
+    "EasyOCRExtractor",
+    "HuggingFaceOCRExtractor",
+    "BaseExtractor",
+]

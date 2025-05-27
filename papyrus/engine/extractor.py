@@ -12,11 +12,12 @@
 import os
 import copy
 from abc import ABC, abstractmethod
-from typing import Optional, Dict
+from typing import Optional
 
-from modular_extractor.core import file
+from papyrus.core import file
 
-from modular_extractor.tools.text_processing import text_without_tables
+from papyrus.tools.text_processing import text_without_tables
+
 
 class BaseExtractor(ABC):
     """
@@ -24,12 +25,12 @@ class BaseExtractor(ABC):
     All concrete extractors must implement the `_run_impl` method.
     """
 
-    def __init__(self, capabilities = set()) -> None:
+    def __init__(self, capabilities=set()) -> None:
         self.capabilities = set()
         if not isinstance(self, BaseExtractor):
-            raise TypeError(f"Expected extractor to be an instance of BaseExtractor, got {type(self).__name__} instead.")
-
-
+            raise TypeError(
+                f"Expected extractor to be an instance of BaseExtractor, got {type(self).__name__} instead."
+            )
 
     def run(self, file: "file.File") -> None:
         before = copy.deepcopy(file.pages)
@@ -43,14 +44,22 @@ class BaseExtractor(ABC):
             if not isinstance(page_num, int):
                 raise TypeError(f"Page key must be int, got {type(page_num)}")
             if not isinstance(content, dict):
-                raise TypeError(f"Page content must be dict, got {type(content)} for page {page_num}")
+                raise TypeError(
+                    f"Page content must be dict, got {type(content)} for page {page_num}"
+                )
 
             if "text" not in content or "tables" not in content:
-                raise KeyError(f"Page {page_num} dict must have keys 'text' and 'tables'")
+                raise KeyError(
+                    f"Page {page_num} dict must have keys 'text' and 'tables'"
+                )
             if not isinstance(content["text"], str):
-                raise TypeError(f"Page {page_num} 'text' must be str, got {type(content['text'])}")
+                raise TypeError(
+                    f"Page {page_num} 'text' must be str, got {type(content['text'])}"
+                )
             if not isinstance(content["tables"], list):
-                raise TypeError(f"Page {page_num} 'tables' must be list, got {type(content['tables'])}")
+                raise TypeError(
+                    f"Page {page_num} 'tables' must be list, got {type(content['tables'])}"
+                )
 
     @abstractmethod
     def _run_impl(self, file: "file.File") -> None:
@@ -64,7 +73,7 @@ class BaseExtractor(ABC):
 
 
 class DoclingExtractor(BaseExtractor):
-    def __init__(self, capabilities = set()):
+    def __init__(self, capabilities=set()):
         super().__init__()
         self.capabilities = {"text", "tables", "text_ocr", "tables_orc"}
 
@@ -85,12 +94,10 @@ class DoclingExtractor(BaseExtractor):
         page_md = conv_res.document.export_to_markdown()
         file.pages[0]["text"] = page_text
         file.pages[0]["text_md"] = page_md
-            
 
         for table in conv_res.document.tables:
             table_df: pd.DataFrame = table.export_to_dataframe()
             file.pages[0]["tables"].append(table_df)
-
 
 
 class PDFPlumberExtractor(BaseExtractor):
@@ -98,7 +105,7 @@ class PDFPlumberExtractor(BaseExtractor):
     Extracts text and tables using the pdfplumber library.
     """
 
-    def __init__(self, capabilities = set()):
+    def __init__(self, capabilities=set()):
         super().__init__()
         self.capabilities = {"text", "tables"}
 
@@ -116,7 +123,9 @@ class PDFPlumberExtractor(BaseExtractor):
         try:
             import pdfplumber
         except ImportError:
-            raise ImportError("'pdfplumber' is not installed. Run `pip install pdfplumber`")
+            raise ImportError(
+                "'pdfplumber' is not installed. Run `pip install pdfplumber`"
+            )
         try:
             import pandas as pd
         except ImportError:
@@ -136,12 +145,13 @@ class PDFPlumberExtractor(BaseExtractor):
                     if not df.empty:
                         file.pages[page_number]["tables"].append(df)
 
+
 class PyMuPDFExtractor(BaseExtractor):
     """
     Extracts text and tables using the PyMuPDF (fitz) library.
     """
 
-    def __init__(self, capabilities = set()):
+    def __init__(self, capabilities=set()):
         super().__init__()
         self.capabilities = {"text", "tables"}
 
@@ -188,7 +198,7 @@ class PyPDF2Extractor(BaseExtractor):
     Extracts text using the PyPDF2 library.
     """
 
-    def __init__(self, capabilities = set()):
+    def __init__(self, capabilities=set()):
         super().__init__()
         self.capabilities = {"text"}
 
@@ -242,12 +252,13 @@ class EasyOCRExtractor(BaseExtractor):
 
         file.pages[1]["text"] = "\n".join(results).strip()
 
+
 class TesseractOCRExtractor(BaseExtractor):
     """
     Extracts OCR text using the Tesseract library.
     """
 
-    def __init__(self, capabilities = set()):
+    def __init__(self, capabilities=set()):
         super().__init__()
         self.capabilities = {"text_ocr"}
 
@@ -256,7 +267,9 @@ class TesseractOCRExtractor(BaseExtractor):
             import pytesseract
             from PIL import Image
         except ImportError:
-            raise ImportError("'pytesseract' or 'Pillow' is not installed. Run `pip install pytesseract Pillow`")
+            raise ImportError(
+                "'pytesseract' or 'Pillow' is not installed. Run `pip install pytesseract Pillow`"
+            )
 
         if not os.path.exists(file.path):
             raise FileNotFoundError(f"File not found: {file.path}")
@@ -271,21 +284,33 @@ class HuggingFaceOCRExtractor(BaseExtractor):
     Extracts OCR text using a Hugging Face model (e.g., TroCR).
     """
 
-    def __init__(self, model_name: str = "microsoft/trocr-base-printed", use_cuda: bool = False):
+    def __init__(
+        self, model_name: str = "microsoft/trocr-base-printed", use_cuda: bool = False
+    ):
         self.model_name = model_name
         self.use_cuda = use_cuda
         super().__init__()
         self.capabilities = {"text_ocr"}
         try:
             import torch
-            from transformers import AutoProcessor, AutoModelForVision2Seq, BitsAndBytesConfig
+            from transformers import (
+                AutoProcessor,
+                AutoModelForVision2Seq,
+                BitsAndBytesConfig,
+            )
         except ImportError:
-            raise ImportError("Missing required packages. Run `pip install torch transformers bitsandbytes`")
+            raise ImportError(
+                "Missing required packages. Run `pip install torch transformers bitsandbytes`"
+            )
 
         quant_config = BitsAndBytesConfig(load_in_8bit=True)
         self.tokenizer = AutoProcessor.from_pretrained(model_name)
-        self.model = AutoModelForVision2Seq.from_pretrained(model_name, quantization_config=quant_config)
-        self.device = torch.device("cuda" if use_cuda and torch.cuda.is_available() else "cpu")
+        self.model = AutoModelForVision2Seq.from_pretrained(
+            model_name, quantization_config=quant_config
+        )
+        self.device = torch.device(
+            "cuda" if use_cuda and torch.cuda.is_available() else "cpu"
+        )
         self.model.to(self.device)
 
     def _run_impl(self, file: "file.File") -> None:
@@ -300,13 +325,22 @@ class HuggingFaceOCRExtractor(BaseExtractor):
 
         images = convert_from_path(file.path)
 
-        messages = [{"role": "user", "content": [{"type": "text", "text": "Describe this image."}]}]
-        text_prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        messages = [
+            {
+                "role": "user",
+                "content": [{"type": "text", "text": "Describe this image."}],
+            }
+        ]
+        text_prompt = self.tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
 
         for page_number, image in enumerate(images, start=1):
             try:
                 image = image.convert("RGB")
-                inputs = self.tokenizer(text=[text_prompt], images=image, return_tensors="pt")
+                inputs = self.tokenizer(
+                    text=[text_prompt], images=image, return_tensors="pt"
+                )
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
                 with torch.no_grad():
@@ -319,9 +353,8 @@ class HuggingFaceOCRExtractor(BaseExtractor):
                 print(f"Skipping page {page_number}: {e}")
 
 
-
 class CamelotExtractor(BaseExtractor):
-    def __init__(self, capabilities = set()):
+    def __init__(self, capabilities=set()):
         super().__init__()
         self.capabilities = {"text_ocr"}
 
@@ -330,8 +363,7 @@ class CamelotExtractor(BaseExtractor):
             import camelot
         except ImportError:
             raise ImportError("'camelot' is not installed. Run `pip install camelot`")
-        
-        tables = camelot.read_pdf(file.path, pages='all')
+
+        tables = camelot.read_pdf(file.path, pages="all", flavor="stream")
         for page_number, table in enumerate(tables):
             file.pages[page_number]["tables"].append(table.df)
-
